@@ -1,0 +1,26 @@
+{
+  "name": "task-manager",
+  "version": "1.0.0",
+  "description": "express project ( john smilga  )",
+  "homepage": "https://github.com/Leleo1337/task-manager#readme",
+  "bugs": {
+    "url": "https://github.com/Leleo1337/task-manager/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leleo1337/task-manager.git"
+  },
+  "license": "ISC",
+  "author": "leleo1337",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
