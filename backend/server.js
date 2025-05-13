@@ -1,11 +1,16 @@
-import express from 'express'
-import path from 'path';
+import express from "express";
+import path from "path";
+import tasks from "./routes/tasks.js";
 
-const app = express()
-const PORT = 5000
+const app = express();
+const PORT = 3000;
 
-const __dirname = import.meta.dirname
+const __dirname = import.meta.dirname;
 
-app.use(express.static(path.join(__dirname, '../frontend/public')))
+// middleware
+app.use(express.json())
 
-app.listen(PORT, () => console.log(`Server listening on port ${PORT}`))
+app.use(express.static(path.join(__dirname, "../frontend/public"))); // static assets
+app.use('/api/v1/tasks', tasks) // routes
+
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
