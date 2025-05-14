@@ -1,16 +1,17 @@
-import express from "express";
-import path from "path";
-import tasks from "./routes/tasks.js";
+import app from "./app.js";
+import connectDB from "./db/connect.js";
+import dotenv from 'dotenv'
+dotenv.config()
 
-const app = express();
 const PORT = 3000;
 
-const __dirname = import.meta.dirname;
+async function start(){
+    try {
+        await connectDB(process.env.DATABASE_ACCESS)
+        app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+    } catch (error) {
+        console.log(error)
+    }
+}
 
-// middleware
-app.use(express.json())
-
-app.use(express.static(path.join(__dirname, "../frontend/public"))); // static assets
-app.use('/api/v1/tasks', tasks) // routes
-
-app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+start()
