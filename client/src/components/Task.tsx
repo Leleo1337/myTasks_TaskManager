@@ -2,7 +2,7 @@ import { Calendar, Edit, LucideCircle, LucideCircleCheckBig, MoreVertical, Trash
 import PriorityFlag from "./PriorityFlag";
 import clsx from "clsx";
 import CustomFlag from "./CustomFlag";
-import type { taskProps } from "../types/tasks";
+import type { taskProps } from "../types/tasksTypes";
 
 export default function Task({ toggleCheck, checked, toggleSettings, menuOpen, toggleEditForm }: taskProps) {
    return (

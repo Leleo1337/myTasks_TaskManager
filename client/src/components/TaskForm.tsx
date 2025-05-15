@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { taskFormProps } from "../types/tasks";
+import type { taskFormProps } from "../types/tasksTypes";
 
 export default function TaskForm({ method, closeForm }: taskFormProps) {
    return (

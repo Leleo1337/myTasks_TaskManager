@@ -1,4 +1,4 @@
-import type { customFlagProps } from "../types/Flags";
+import type { customFlagProps } from "../types/flagsTypes";
 import hexToRGB from "../utils/hexToRgba";
 
 export default function CustomFlag({ text, color }: customFlagProps) {

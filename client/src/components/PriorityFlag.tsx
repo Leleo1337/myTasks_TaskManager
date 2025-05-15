@@ -1,4 +1,4 @@
-import type { priorityFlagProps } from "../types/Flags";
+import type { priorityFlagProps } from "../types/flagsTypes";
 import hexToRGB from "../utils/hexToRgba";
 import getFlagsColor from "../utils/priorityFlagsColor";
 
