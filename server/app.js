@@ -7,8 +7,7 @@ const app = express()
 const __dirname = import.meta.dirname;
 
 app.use(express.json())
-app.use(express.static(path.join(__dirname, "../frontend/public")));
-app.use(notFound)
+app.use(express.static(path.join(__dirname, "../frontend-template/public")));
 app.use('/api/v1/tasks', tasks)
 
 export default app

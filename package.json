@@ -15,14 +15,14 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon ./backend/server.js"
-  },
+    "dev": "concurrently \"nodemon ./server/server.js\" \"npm run dev --prefix client\""  },
   "dependencies": {
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "mongoose": "^8.14.3"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "nodemon": "^3.1.10"
   }
 }
