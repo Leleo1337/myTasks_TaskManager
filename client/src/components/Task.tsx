@@ -4,19 +4,31 @@ import clsx from "clsx";
 import CustomFlag from "./CustomFlag";
 import type { taskProps } from "../types/tasksTypes";
 
-export default function Task({ toggleCheck, checked, toggleSettings, menuOpen, toggleEditForm }: taskProps) {
+export default function Task({
+   title,
+   description,
+   priority,
+   tags,
+   date,
+   toggleComplete,
+   completed,
+   toggleSettings,
+   menuOpen,
+   toggleEditForm,
+   deleteTask
+}: taskProps) {
    return (
       <>
          <div
             className={clsx(
                `w-full border-l-5 ${
-                  checked ? "border-green-400" : "border-gray-300"
+                  completed ? "border-green-400" : "border-gray-300"
                } bg-white rounded-xl drop-shadow-xs hover:drop-shadow-md  transition-all ease duration-200`
             )}>
-            <div className="flex gap-4 p-4">
+            <div className="relative z-20 flex gap-4 p-4">
                <div>
-                  <button onClick={toggleCheck} className="rounded-full mt-0.5 cursor-pointer">
-                     {checked ? (
+                  <button onClick={toggleComplete} className="rounded-full mt-0.5 cursor-pointer">
+                     {completed ? (
                         <LucideCircleCheckBig size={20} color="#05df72" />
                      ) : (
                         <LucideCircle size={20} color="#99a1af" />
@@ -25,20 +37,24 @@ export default function Task({ toggleCheck, checked, toggleSettings, menuOpen, t
                </div>
                <div className="flex flex-1 flex-col">
                   <div className="flex gap-2 mb-2 flex-wrap">
-                     <h3 className={clsx(`font-semibold ${checked ? "line-through text-gray-600" : "text-black"}`)}>
-                        exemplo teste
+                     <h3 className={clsx(`font-semibold ${completed ? "line-through text-gray-600" : "text-black"}`)}>
+                        {title}
                      </h3>
-                     <PriorityFlag type="Low" />
+                     <PriorityFlag type={priority} />
                   </div>
-                  <div className={clsx(`text-sm pb-4 ${checked ? "text-gray-400" : "text-gray-600"}`)}>
-                     teste 123 teste 14 daslpd slppalds lpasdlpadslpasdplasd lpad lpslpdaslpdaslpasd lp
+                  <div className={clsx(`text-sm pb-4 ${completed ? "text-gray-400" : "text-gray-600"}`)}>
+                     {description}
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                      <div className="flex items-center gap-1 text-red-700">
                         <Calendar size={15} />
-                        <span className="text-xs">03/03</span>
+                        <span className="text-xs">{date}</span>
                      </div>
-                     <CustomFlag color="#FF0000" text="2:00" />
+                     {tags &&  
+                        tags.map((tag, index) => (
+                           <CustomFlag key={index} text={tag.text} color={tag.color}/>
+                        ))
+                     }
                   </div>
                </div>
                <div className="relative">
@@ -46,14 +62,14 @@ export default function Task({ toggleCheck, checked, toggleSettings, menuOpen, t
                      <MoreVertical size={18} className="text-black" />
                   </button>
                   {menuOpen && (
-                     <div className="absolute right-0 top-6 w-36 bg-white p-3 space-y-3 shadow-md ring ring-gray-400/20 rounded-md">
+                     <div className="absolute z-50 right-0 top-6 w-36 bg-white shadow-md ring ring-gray-400/20 rounded-md">
                         <button
                            onClick={toggleEditForm}
-                           className="flex items-center gap-1 text-blue-500 text-sm cursor-pointer hover:text-blue-700">
+                           className="w-full p-3 flex items-center gap-1 text-blue-500 text-sm cursor-pointer hover:bg-gray-50">
                            <Edit size={18} />
                            <span>Edit</span>
                         </button>
-                        <button className="flex items-center gap-1 text-red-500 text-sm hover:text-red-700 cursor-pointer">
+                        <button onClick={deleteTask} className="flex items-center gap-1 w-full p-3 text-red-500 text-sm hover:bg-gray-50 cursor-pointer">
                            <Trash2 size={18} />
                            <span>Delete</span>
                         </button>
