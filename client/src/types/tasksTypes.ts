@@ -1,12 +1,24 @@
 export type taskProps = {
-   toggleCheck: () => void;
+   _id?: string;
+   title: string;
+   description: string;
+   priority: "Low" | "Medium" | "High";
+   tags?: {
+      text: string;
+      color: string;
+   }[];
+   date: string;
+   toggleComplete: () => void;
    toggleSettings: () => void;
    toggleEditForm: () => void;
-   checked: boolean;
+   deleteTask: () => void;
+   completed: boolean;
    menuOpen: boolean;
 };
 
 export type taskFormProps = {
-   method: string;
-   closeForm: () => void;
+      method: string
+      task?: taskProps
+      onCancel: () => void
+      onSubmitSuccess: () => void
 };
