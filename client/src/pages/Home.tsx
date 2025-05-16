@@ -1,56 +1,109 @@
-import { CheckSquare, Filter, PlusCircle, Search } from "lucide-react";
+import { CheckSquare, Filter, PlusCircle, Search, SquareCheckBig } from "lucide-react";
 import Task from "../components/Task";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TaskForm from "../components/TaskForm";
+import type { taskProps } from "../types/tasksTypes";
+import axios from "axios";
 
 export default function Home() {
-   const [check, setCheck] = useState<boolean>(false);
-   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-   const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
    const [openCreateTaskForm, toggleCreateOpenTaskForm] = useState<boolean>(false);
-   const [openEditForm, toggleOpenEditForm] = useState<boolean>(false);
+   const [menuOpen, setMenuOpen] = useState<string | null | undefined>("");
+   const [openEditForm, toggleOpenEditForm] = useState<string | null | undefined>("");
+   const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
 
-   function addTask() {
-      toggleCreateOpenTaskForm(!openCreateTaskForm);
+   const [tasks, setTasks] = useState<taskProps[]>([]);
+
+   const taskLength = tasks?.length;
+   const completed = tasks?.filter((task) => task.completed === true).length;
+   const tasksStatus = {
+      taskLength,
+      completed,
+      percentage: taskLength === 0 ? 0 : (completed / taskLength) * 100,
+   };
+
+   function getTasks() {
+      axios.get("http://localhost:3000/api/v1/tasks").then(function (response) {
+         setTasks(response.data.tasks);
+      });
    }
 
-   function handleToggleCheck() {
-      setCheck(!check);
+   function deleteTask(taskID: string | undefined) {
+      axios.delete(`http://localhost:3000/api/v1/tasks/${taskID}`).then(() => {
+         setTasks((prev) => prev?.filter((task) => task._id !== taskID));
+      });
    }
 
-   function handleToggleSettings() {
-      setMenuOpen(!menuOpen);
+   function completeTask(taskID: string | undefined) {
+      const task = tasks?.find((task) => task._id === taskID);
+      axios.patch(`http://localhost:3000/api/v1/tasks/${taskID}`, { ...task, completed: !task?.completed }).then(() => {
+         getTasks();
+      });
    }
 
-   function handleToggleFilterTab() {
-      setfiltersTabActive(!filtersTabActive);
+   function filterTasks(search: string) {
+      const filteredTasks = tasks.filter((task) => task.title.includes(search));
+      setTimeout(() => {
+         if (search === "") {
+            getTasks();
+         }
+         setTasks(filteredTasks);
+         console.log(filteredTasks);
+      }, 600);
    }
 
-   function handleEditForm() {
-      toggleOpenEditForm(!openEditForm);
-   }
+   useEffect(() => {
+      getTasks();
+   }, []);
 
    return (
       <>
          {openCreateTaskForm && (
-            <TaskForm method="Create task" closeForm={() => toggleCreateOpenTaskForm(!openCreateTaskForm)} />
+            <TaskForm
+               method="Create task"
+               onCancel={() => toggleCreateOpenTaskForm(false)}
+               onSubmitSuccess={() => {
+                  toggleCreateOpenTaskForm(false);
+                  axios.get("http://localhost:3000/api/v1/tasks").then((response) => {
+                     setTasks(response.data.tasks);
+                  });
+               }}
+            />
          )}
-         {openEditForm && <TaskForm method="Edit task" closeForm={() => toggleOpenEditForm(!openEditForm)} />}
+         {openEditForm && (
+            <TaskForm
+               method="Edit task"
+               task={tasks.find((task) => task._id === openEditForm)}
+               onCancel={() => toggleOpenEditForm(null)}
+               onSubmitSuccess={() => {
+                  toggleOpenEditForm(null);
+                  axios.get("http://localhost:3000/api/v1/tasks").then((response) => {
+                     setTasks(response.data.tasks);
+                  });
+                  setMenuOpen(null);
+               }}
+            />
+         )}
          <div className="w-full h-screen bg-gray-50">
             <header className="flex items-center justify-between max-w-[772px] mx-auto p-4 pb-6 ">
                <div className="flex items-center gap-3">
                   <div className="bg-blue-600 text-white p-2.5 rounded-lg">
                      <CheckSquare size={20} />
                   </div>
-                  <h1 className="font-bold text-xl">myTask</h1>
+                  <h1 className="font-bold text-xl">myTasks</h1>
                </div>
                <div className="space-y-1">
                   <div className="flex gap-1.5 items-center text-sm">
-                     <span className="font-semibold text-gray-500">1/2 completed</span>
-                     <span className="bg-blue-600/20 text-blue-800 rounded-full px-1">50%</span>
+                     <span className="font-semibold text-gray-500 w-30">
+                        {`${tasksStatus.completed}/${tasksStatus.taskLength}`} completed
+                     </span>
+                     <span className="flex items-center justify-center bg-blue-600/20 font-semibold text-blue-800 rounded-full px-1 w-4 text-xs">
+                        {tasksStatus.taskLength}
+                     </span>
                   </div>
                   <div className="w-full bg-gray-300 h-1 rounded-full">
-                     <div className="h-full bg-blue-600 rounded-full" style={{ width: "50%" }}></div>
+                     <div
+                        className=" h-full bg-blue-600 rounded-full transition-all ease duration-75"
+                        style={{ width: `${tasksStatus.percentage}%` }}></div>
                   </div>
                </div>
             </header>
@@ -59,10 +112,12 @@ export default function Home() {
                   <div className="flex items-center justify-between mb-4">
                      <div className="flex items-center gap-2">
                         <h2 className="font-bold text-2xl">Tasks</h2>
-                        <span className="bg-blue-600/20 text-blue-800 h-5 rounded-full px-2.5 text-sm">0</span>
+                        <span className="bg-blue-600/20 text-blue-800 h-5 rounded-full px-2.5 text-sm">
+                           {tasksStatus.taskLength}
+                        </span>
                      </div>
                      <button
-                        onClick={addTask}
+                        onClick={() => toggleCreateOpenTaskForm(!openCreateTaskForm)}
                         className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-md font-semibold text-white text-sm cursor-pointer transition-colors ease-in duration-75">
                         <PlusCircle size={20} /> Add Task
                      </button>
@@ -76,11 +131,12 @@ export default function Home() {
                            type="text"
                            id="text"
                            placeholder="Search tasks..."
+                           onChange={(e) => filterTasks(e.target.value)}
                            className="w-full pl-10 py-2 outline-none focus:ring ring-blue-500 rounded-md"
                         />
                      </div>
                      <button
-                        onClick={handleToggleFilterTab}
+                        onClick={() => setfiltersTabActive(!filtersTabActive)}
                         className="flex gap-2.5 w-full sm:w-30 sm:justify-center items-center bg-white hover:bg-gray-50 border border-gray-300 font-semibold text-gray-700 text-sm rounded-md p-2 pl-3 box-border cursor-pointer transition-colors ease-in duration-75">
                         <Filter size={18} /> Filters
                      </button>
@@ -94,14 +150,30 @@ export default function Home() {
                         </div>
                      )}
                   </div>
-                  <div>
-                     <Task
-                        toggleCheck={handleToggleCheck}
-                        toggleSettings={handleToggleSettings}
-                        toggleEditForm={handleEditForm}
-                        checked={check}
-                        menuOpen={menuOpen}
-                     />
+                  <div className="space-y-4">
+                     {tasksStatus.taskLength === 0 && (
+                        <div className="flex flex-col items-center justify-center gap-16 h-70">
+                           <span className="font-semibold text-gray-400">You have no items in you Task List</span>
+                           <SquareCheckBig size={130} className="text-gray-200"/>
+                        </div>
+                     )}
+                     {tasks &&
+                        tasks.map((task) => (
+                           <Task
+                              key={task._id}
+                              title={task.title}
+                              description={task.description}
+                              priority={task.priority}
+                              date={task.date}
+                              tags={task.tags}
+                              toggleSettings={() => setMenuOpen(menuOpen === task._id ? null : task._id)}
+                              toggleComplete={() => completeTask(task._id)}
+                              toggleEditForm={() => toggleOpenEditForm(openEditForm === task._id ? null : task._id)}
+                              deleteTask={() => deleteTask(task._id)}
+                              menuOpen={menuOpen === task._id}
+                              completed={task.completed}
+                           />
+                        ))}
                   </div>
                </section>
             </main>
@@ -109,3 +181,14 @@ export default function Home() {
       </>
    );
 }
+
+/*
+   <Task
+      toggleCheck={() => setCheck(!check)}
+      toggleSettings={() => setMenuOpen(!menuOpen)}
+      toggleEditForm={() => toggleOpenEditForm(!openEditForm)}
+      checked={check}
+      menuOpen={menuOpen}
+   />
+
+*/
