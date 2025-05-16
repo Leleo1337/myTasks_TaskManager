@@ -23,12 +23,12 @@ export async function getTask(req, res) {
 }
 
 export async function createTask(req, res) {
-   const { name, completed } = req.body;
+   const { title, description, priority, completed, tags, date } = req.body;
+   if (!title) {
+      return res.status(400).json({ msg: "You must provide a title" });
+   }
    try {
-      const task = await Task.create({ name, completed });
-      if(!name || name.length == 0){
-         return res.status(400).json({msg: `you must insert a name`})
-      }
+      const task = await Task.create({ title, description, priority, completed, tags, date });
       res.status(201).json({ success: true, task });
    } catch (error) {
       res.status(500).json({ msg: error });
@@ -37,15 +37,21 @@ export async function createTask(req, res) {
 
 export async function updateTask(req, res) {
    const { id: taskID } = req.params;
-   const { name, completed } = req.body;
-   
-   try {
-      const task = await Task.findByIdAndUpdate(taskID, { name, completed }, {new: true, runValidators: true});
+   const { title, description, priority, completed, tags, date } = req.body;
 
-      if(!task){
-         return res.status(404).json({msg: `no task with id: ${taskID} found`})
+   if (!title) {
+      return res.status(400).json({ msg: "You must provide a title" });
+   }
+   try {
+      const task = await Task.findByIdAndUpdate(
+         taskID, { title, description, priority, completed, tags, date },
+         { new: true, runValidators: true }
+      );
+
+      if (!task) {
+         return res.status(404).json({ msg: `no task with id: ${taskID} found` });
       }
-      res.status(200).json({ success: true, task});
+      res.status(200).json({ success: true, task });
    } catch (error) {
       res.status(500).json({ msg: error });
    }
@@ -54,9 +60,9 @@ export async function deleteTask(req, res) {
    const { id: taskID } = req.params;
 
    try {
-      const task = await Task.findByIdAndDelete(taskID)
-      if(!task){
-         return res.status(404).json({msg: `no task with id: ${taskID} found`})
+      const task = await Task.findByIdAndDelete(taskID);
+      if (!task) {
+         return res.status(404).json({ msg: `no task with id: ${taskID} found` });
       }
       res.status(200).json({ success: true, task });
    } catch (error) {
