@@ -4,22 +4,28 @@ import { useEffect, useState } from "react";
 import TaskForm from "../components/TaskForm";
 import type { taskProps } from "../types/tasksTypes";
 import axios from "axios";
+import FiltersTab from "../components/FiltersTab";
 
 export default function Home() {
    const [openCreateTaskForm, toggleCreateOpenTaskForm] = useState<boolean>(false);
    const [menuOpen, setMenuOpen] = useState<string | null | undefined>("");
    const [openEditForm, toggleOpenEditForm] = useState<string | null | undefined>("");
    const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
-
    const [tasks, setTasks] = useState<taskProps[]>([]);
 
-   const taskLength = tasks?.length;
-   const completed = tasks?.filter((task) => task.completed === true).length;
    const tasksStatus = {
-      taskLength,
-      completed,
-      percentage: taskLength === 0 ? 0 : (completed / taskLength) * 100,
+      taskLength: tasks?.length,
+      completed: tasks?.filter((task) => task.completed === true).length,
    };
+   const percentage = tasksStatus.taskLength === 0 ? 0 : (tasksStatus.completed / tasksStatus.taskLength) * 100
+
+   const taskQuantity = {
+        low: tasks.filter(task => task.priority === 'Low').length,
+        medium: tasks.filter(task => task.priority === 'Medium').length,
+        high: tasks.filter(task => task.priority === 'High').length,
+        completed: tasks.filter(task => task.completed === true).length,
+        uncompleted: tasksStatus.taskLength - tasksStatus.completed
+   }
 
    function getTasks() {
       axios.get("http://localhost:3000/api/v1/tasks").then(function (response) {
@@ -40,16 +46,17 @@ export default function Home() {
       });
    }
 
-   function filterTasks(search: string) {
-      const filteredTasks = tasks.filter((task) => task.title.includes(search));
-      setTimeout(() => {
-         if (search === "") {
-            getTasks();
-         }
-         setTasks(filteredTasks);
-         console.log(filteredTasks);
-      }, 600);
-   }
+      function filterSearchTasks(search: string) {
+         setTimeout(() => {
+            if (search === "") {
+               getTasks();
+            }else{
+               const filteredTasks = tasks.filter((task) => task.title.trim().toLowerCase().includes(search.toLowerCase()))
+               setTasks(filteredTasks);
+            }
+         }, 600);
+      }
+
 
    useEffect(() => {
       getTasks();
@@ -103,7 +110,7 @@ export default function Home() {
                   <div className="w-full bg-gray-300 h-1 rounded-full">
                      <div
                         className=" h-full bg-blue-600 rounded-full transition-all ease duration-75"
-                        style={{ width: `${tasksStatus.percentage}%` }}></div>
+                        style={{ width: `${percentage}%` }}></div>
                   </div>
                </div>
             </header>
@@ -131,7 +138,7 @@ export default function Home() {
                            type="text"
                            id="text"
                            placeholder="Search tasks..."
-                           onChange={(e) => filterTasks(e.target.value)}
+                           onChange={(e) => filterSearchTasks(e.target.value)}
                            className="w-full pl-10 py-2 outline-none focus:ring ring-blue-500 rounded-md"
                         />
                      </div>
@@ -145,9 +152,7 @@ export default function Home() {
                <section className="pt-6">
                   <div>
                      {filtersTabActive && (
-                        <div className="bg-gray-100 border border-gray-100 mb-8">
-                           <p>QUE PREGUIÇA FAZER ISSO</p>
-                        </div>
+                        <FiltersTab quantity={taskQuantity}/>
                      )}
                   </div>
                   <div className="space-y-4">
