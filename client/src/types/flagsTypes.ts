@@ -5,4 +5,5 @@ export type priorityFlagProps = {
 export type customFlagProps = {
     text: string
     color: string
+    size: "small" | "medium" 
 }
