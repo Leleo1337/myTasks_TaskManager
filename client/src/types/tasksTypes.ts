@@ -12,6 +12,7 @@ export type taskProps = {
    toggleSettings: () => void;
    toggleEditForm: () => void;
    deleteTask: () => void;
+   onCloseMenu: () => void
    completed: boolean;
    menuOpen: boolean;
 };
