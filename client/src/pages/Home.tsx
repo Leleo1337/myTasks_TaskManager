@@ -13,19 +13,34 @@ export default function Home() {
    const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
    const [tasks, setTasks] = useState<taskProps[]>([]);
 
+   const filters = {
+      status: {
+         all: "",
+         active: "",
+         completed: "",
+      },
+      priority: {
+         all: "",
+         low: "",
+         medium: "",
+         High: "",
+      },
+   };
+
    const tasksStatus = {
       taskLength: tasks?.length,
       completed: tasks?.filter((task) => task.completed === true).length,
    };
-   const percentage = tasksStatus.taskLength === 0 ? 0 : (tasksStatus.completed / tasksStatus.taskLength) * 100
+   const percentage = tasksStatus.taskLength === 0 ? 0 : (tasksStatus.completed / tasksStatus.taskLength) * 100;
 
    const taskQuantity = {
-        low: tasks.filter(task => task.priority === 'Low').length,
-        medium: tasks.filter(task => task.priority === 'Medium').length,
-        high: tasks.filter(task => task.priority === 'High').length,
-        completed: tasks.filter(task => task.completed === true).length,
-        uncompleted: tasksStatus.taskLength - tasksStatus.completed
-   }
+      all: tasks.length,
+      low: tasks.filter((task) => task.priority === "Low").length,
+      medium: tasks.filter((task) => task.priority === "Medium").length,
+      high: tasks.filter((task) => task.priority === "High").length,
+      completed: tasks.filter((task) => task.completed === true).length,
+      uncompleted: tasksStatus.taskLength - tasksStatus.completed,
+   };
 
    function getTasks() {
       axios.get("http://localhost:3000/api/v1/tasks").then(function (response) {
@@ -46,17 +61,18 @@ export default function Home() {
       });
    }
 
-      function filterSearchTasks(search: string) {
-         setTimeout(() => {
-            if (search === "") {
-               getTasks();
-            }else{
-               const filteredTasks = tasks.filter((task) => task.title.trim().toLowerCase().includes(search.toLowerCase()))
-               setTasks(filteredTasks);
-            }
-         }, 600);
-      }
-
+   function searchTasks(search: string) {
+      setTimeout(() => {
+         if (search === "") {
+            getTasks();
+         } else {
+            const filteredTasks = tasks.filter((task) =>
+               task.title.trim().toLowerCase().includes(search.toLowerCase())
+            );
+            setTasks(filteredTasks);
+         }
+      }, 600);
+   }
 
    useEffect(() => {
       getTasks();
@@ -138,7 +154,7 @@ export default function Home() {
                            type="text"
                            id="text"
                            placeholder="Search tasks..."
-                           onChange={(e) => filterSearchTasks(e.target.value)}
+                           onChange={(e) => searchTasks(e.target.value)}
                            className="w-full pl-10 py-2 outline-none focus:ring ring-blue-500 rounded-md"
                         />
                      </div>
@@ -150,16 +166,12 @@ export default function Home() {
                   </div>
                </section>
                <section className="pt-6">
-                  <div>
-                     {filtersTabActive && (
-                        <FiltersTab quantity={taskQuantity}/>
-                     )}
-                  </div>
+                  <div>{filtersTabActive && <FiltersTab quantity={taskQuantity} filter={filters} />}</div>
                   <div className="space-y-4">
                      {tasksStatus.taskLength === 0 && (
                         <div className="flex flex-col items-center justify-center gap-16 h-70">
                            <span className="font-semibold text-gray-400">You have no items in you Task List</span>
-                           <SquareCheckBig size={130} className="text-gray-200"/>
+                           <SquareCheckBig size={130} className="text-gray-200" />
                         </div>
                      )}
                      {tasks &&
@@ -175,6 +187,7 @@ export default function Home() {
                               toggleComplete={() => completeTask(task._id)}
                               toggleEditForm={() => toggleOpenEditForm(openEditForm === task._id ? null : task._id)}
                               deleteTask={() => deleteTask(task._id)}
+                              onCloseMenu={() => setMenuOpen(null)}
                               menuOpen={menuOpen === task._id}
                               completed={task.completed}
                            />
