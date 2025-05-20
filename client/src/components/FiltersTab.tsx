@@ -1,26 +1,4 @@
-type filtersTabProps = {
-   quantity: {
-      all: number;
-      low: number;
-      medium: number;
-      high: number;
-      completed: number;
-      uncompleted: number;
-   };
-   filter: {
-      status: {
-         all: any;
-         active: any;
-         completed: any;
-      };
-      priority: {
-         all: any;
-         low: any;
-         medium: any;
-         High: any;
-      };
-   };
-};
+import type { filtersTabProps } from "../types/filterTypes";
 
 export default function FiltersTab({ quantity, filter }: filtersTabProps) {
    const btnActive = `bg-blue-300/60 text-blue-700 py-1 px-4 rounded-md border border-blue-500`;
@@ -105,6 +83,7 @@ export default function FiltersTab({ quantity, filter }: filtersTabProps) {
                   </div>
                </div>
             </div>
+            <span className="text-red-500 font-semibold text-xs">Filters are not working for now xD</span>
          </div>
       </div>
    );
