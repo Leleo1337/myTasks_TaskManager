@@ -19,7 +19,6 @@ export default function Task({
    deleteTask,
    onCloseMenu,
 }: taskProps) {
-
    const dropdownRef = useRef<HTMLDivElement | null>(null);
 
    useEffect(() => {
@@ -69,11 +68,17 @@ export default function Task({
                            <span className="text-xs">{date}</span>
                         </div>
                      )}
-                     {tags && tags.map((tag, index) => <CustomFlag key={index} text={tag.text} color={tag.color} size="small"/>)}
+                     {tags &&
+                        tags.map((tag, index) => (
+                           <CustomFlag key={index} text={tag.text} color={tag.color} size="small" allowDelete={false} />
+                        ))}
                   </div>
                </div>
                <div className="relative">
-                  <button onClick={toggleSettings} className="hover:bg-gray-100 rounded-full p-1 cursor-pointer">
+                  <button
+                     onMouseDown={(e) => e.stopPropagation()}
+                     onClick={toggleSettings}
+                     className="absolute right-4 sm:right-0 hover:bg-gray-100 rounded-full p-1 cursor-pointer">
                      <MoreVertical size={18} className="text-black" />
                   </button>
                   {menuOpen && (
