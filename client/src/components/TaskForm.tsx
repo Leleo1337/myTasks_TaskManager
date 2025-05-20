@@ -5,9 +5,11 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { SketchPicker } from "react-color";
 import CustomFlag from "./CustomFlag";
+import { v4 } from "uuid";
 
 export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: taskFormProps) {
    const [formData, setFormData] = useState({
+      id: task?._id || "",
       title: task?.title || "",
       description: task?.description || "",
       priority: task?.priority || "Low",
@@ -17,6 +19,7 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
    const [showColorPicker, setShowColorPicker] = useState(false);
    const [currentColor, setCurrentColor] = useState("#000000");
    const [tagText, setTagText] = useState<string>("");
+   const [colorPickerButtonActive, setColorPickerButtonActive] = useState<boolean>(false);
    const colorPickerRef = useRef<HTMLDivElement | null>(null);
 
    function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -26,9 +29,26 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
 
    function handleAddTag(e: React.FormEvent) {
       e.preventDefault();
+
+      if (formData.tags.length >= 10) {
+         toast.error("You cant add more than 10 tags");
+         return;
+      }
+      if (tagText === "") {
+         toast.error("You should add a name to your tag");
+         return;
+      }
       setFormData((prev) => ({
          ...prev,
-         tags: [...prev.tags, { text: tagText, color: currentColor }],
+         tags: [...prev.tags, { id: v4(), text: tagText, color: currentColor }],
+      }));
+   }
+
+   function deleteFlag(id: string | undefined) {
+      const filteredTags = formData.tags.filter((tag) => tag.id !== id);
+      setFormData((prev) => ({
+         ...prev,
+         tags: filteredTags,
       }));
    }
 
@@ -49,6 +69,7 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
    useEffect(() => {
       function handleClickOutSideColorPicker(event: MouseEvent) {
          if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+            setColorPickerButtonActive(false)
             setShowColorPicker(false);
          }
       }
@@ -58,9 +79,7 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
 
    return (
       <>
-         <div>
-            <ToastContainer />
-         </div>
+         <ToastContainer />
          <div className="fixed z-50 w-full h-screen bg-black/40 backdrop-blur-xs">
             <div className="absolute z-10 top-1/2 left-1/2 -translate-1/2 bg-white w-[90%] max-w-[500px] rounded-md">
                <div className="flex justify-between border-b border-gray-300 p-4 py-6">
@@ -146,14 +165,21 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
                                  Add a tag
                               </button>
                               <div
-                                 onClick={() => setShowColorPicker(!showColorPicker)}
-                                 className="border border-gray-200 p-1 rounded-md cursor-pointer hover:text-blue-500 hover:border-blue-500/40">
+                                 onMouseDown={(e) => e.stopPropagation()}
+                                 onClick={() => {
+                                    setShowColorPicker(!showColorPicker);
+                                    setColorPickerButtonActive(!colorPickerButtonActive);
+                                 }}
+                                 className={`border ${
+                                    colorPickerButtonActive ? `border-blue-500/40 text-blue-500` : `border-gray-200`
+                                 } p-1 rounded-md cursor-pointer hover:text-blue-700 hover:border-blue-800/40`}>
                                  <Palette size={28} />
                               </div>
                               {showColorPicker && (
-                                 <div ref={colorPickerRef} className="absolute top-0 right-12">
+                                 <div ref={colorPickerRef} className="absolute sm:top-0 right-12">
                                     <SketchPicker
                                        color={currentColor}
+                                       disableAlpha
                                        onChangeComplete={(color) => setCurrentColor(color.hex)}
                                     />
                                  </div>
@@ -161,7 +187,14 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
                            </div>
                            <div className="flex gap-2 pt-4 h-auto flex-wrap">
                               {formData.tags.map((tag) => (
-                                 <CustomFlag color={tag.color} text={tag.text} size="small" />
+                                 <CustomFlag
+                                    key={tag.id}
+                                    color={tag.color}
+                                    text={tag.text}
+                                    size="small"
+                                    allowDelete={true}
+                                    onClick={() => deleteFlag(tag.id)}
+                                 />
                               ))}
                            </div>
                         </div>
