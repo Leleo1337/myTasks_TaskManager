@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import TaskForm from "../components/TaskForm";
 import type { taskProps } from "../types/tasksTypes";
 import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
 import FiltersTab from "../components/FiltersTab";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function Home() {
    const [openCreateTaskForm, toggleCreateOpenTaskForm] = useState<boolean>(false);
@@ -12,20 +14,6 @@ export default function Home() {
    const [openEditForm, toggleOpenEditForm] = useState<string | null | undefined>("");
    const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
    const [tasks, setTasks] = useState<taskProps[]>([]);
-
-   const filters = {
-      status: {
-         all: "",
-         active: "",
-         completed: "",
-      },
-      priority: {
-         all: "",
-         low: "",
-         medium: "",
-         High: "",
-      },
-   };
 
    const tasksStatus = {
       taskLength: tasks?.length,
@@ -78,13 +66,25 @@ export default function Home() {
       getTasks();
    }, []);
 
+   useEffect(() => {
+      if(openEditForm || openCreateTaskForm){
+         document.body.style = "overflow: hidden"
+      }
+
+      return () => {
+         document.body.style = "overflow: auto" 
+      }
+   }, [openEditForm,openCreateTaskForm]);
+
    return (
       <>
+         <ToastContainer />
          {openCreateTaskForm && (
             <TaskForm
                method="Create task"
                onCancel={() => toggleCreateOpenTaskForm(false)}
                onSubmitSuccess={() => {
+                  toast.success("Task created succefully");
                   toggleCreateOpenTaskForm(false);
                   axios.get("http://localhost:3000/api/v1/tasks").then((response) => {
                      setTasks(response.data.tasks);
@@ -98,6 +98,7 @@ export default function Home() {
                task={tasks.find((task) => task._id === openEditForm)}
                onCancel={() => toggleOpenEditForm(null)}
                onSubmitSuccess={() => {
+                  toast.success("Task edited succefully");
                   toggleOpenEditForm(null);
                   axios.get("http://localhost:3000/api/v1/tasks").then((response) => {
                      setTasks(response.data.tasks);
@@ -106,7 +107,7 @@ export default function Home() {
                }}
             />
          )}
-         <div className="w-full h-screen bg-gray-50">
+         <div className="w-full">
             <header className="flex items-center justify-between max-w-[772px] mx-auto p-4 pb-6 ">
                <div className="flex items-center gap-3">
                   <div className="bg-blue-600 text-white p-2.5 rounded-lg">
@@ -155,6 +156,7 @@ export default function Home() {
                            id="text"
                            placeholder="Search tasks..."
                            onChange={(e) => searchTasks(e.target.value)}
+                           autoComplete="off"
                            className="w-full pl-10 py-2 outline-none focus:ring ring-blue-500 rounded-md"
                         />
                      </div>
@@ -166,11 +168,11 @@ export default function Home() {
                   </div>
                </section>
                <section className="pt-6">
-                  <div>{filtersTabActive && <FiltersTab quantity={taskQuantity} filter={filters} />}</div>
+                  <div>{filtersTabActive && <FiltersTab quantity={taskQuantity} filter={true} />}</div>
                   <div className="space-y-4">
                      {tasksStatus.taskLength === 0 && (
                         <div className="flex flex-col items-center justify-center gap-16 h-70">
-                           <span className="font-semibold text-gray-400">You have no items in you Task List</span>
+                           <span className="font-semibold text-gray-400 text-center">You have no items in you Task List click <span onClick={() => toggleCreateOpenTaskForm(true)} className="text-blue-500 text-lg px-1 underline cursor-pointer">Here</span> to create a task</span>
                            <SquareCheckBig size={130} className="text-gray-200" />
                         </div>
                      )}
@@ -199,14 +201,3 @@ export default function Home() {
       </>
    );
 }
-
-/*
-   <Task
-      toggleCheck={() => setCheck(!check)}
-      toggleSettings={() => setMenuOpen(!menuOpen)}
-      toggleEditForm={() => toggleOpenEditForm(!openEditForm)}
-      checked={check}
-      menuOpen={menuOpen}
-   />
-
-*/
