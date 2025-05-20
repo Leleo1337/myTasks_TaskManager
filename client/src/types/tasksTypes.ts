@@ -4,6 +4,7 @@ export type taskProps = {
    description: string;
    priority: "Low" | "Medium" | "High";
    tags?: {
+      id?:string;
       text: string;
       color: string;
    }[];
