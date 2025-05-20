@@ -17,7 +17,7 @@ const taskSchema = new mongoose.Schema({
    tags: {
       type: [
          {
-            id: { type: String, required: true },
+            id: { type: String, required: false },
             text: { type: String, required: true, trim: true},
             color: { type: String, required: true },
          },
