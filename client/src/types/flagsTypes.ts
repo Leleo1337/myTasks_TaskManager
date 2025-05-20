@@ -5,5 +5,7 @@ export type priorityFlagProps = {
 export type customFlagProps = {
     text: string
     color: string
+    allowDelete: boolean
     size: "small" | "medium" 
+    onClick?: () => void
 }
