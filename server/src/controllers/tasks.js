@@ -25,7 +25,8 @@ export async function getTask(req, res) {
 export async function getTaskBySearch(req, res) {
    const title = req.query.title?.toLowerCase();
    try {
-      const filtered = await Task.find({ title: { $regex: `\\b${title}`, $options: "i" } });
+      const tasks = await Task.find()
+      const filtered = tasks.filter(task => task.title.toLowerCase().includes(title))
       res.status(200).json(filtered);
    } catch (e) {
       res.status(500).json({ msg: "not found" });
