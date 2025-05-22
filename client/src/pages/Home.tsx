@@ -31,8 +31,17 @@ export default function Home() {
    };
 
    function getTasks() {
-      axios.get("http://localhost:3000/api/v1/tasks").then(function (response) {
-         setTasks(response.data.tasks);
+      axios
+         .get("http://localhost:3000/api/v1/tasks")
+         .then(function (response) {
+            setTasks(response.data.tasks);
+         })
+         .catch((e) => console.log(e));
+   }
+
+   function getTaskBySearch(query: string) {
+      axios.get(`http://localhost:3000/api/v1/tasks/search/`, { params: { title: query } }).then(function (response) {
+         setTasks(response.data);
       });
    }
 
@@ -51,14 +60,10 @@ export default function Home() {
 
    function searchTasks(search: string) {
       setTimeout(() => {
-         if (search === "") {
+         if (search.trim() === "") {
             getTasks();
-         } else {
-            const filteredTasks = tasks.filter((task) =>
-               task.title.trim().toLowerCase().includes(search.toLowerCase())
-            );
-            setTasks(filteredTasks);
          }
+         getTaskBySearch(search);
       }, 600);
    }
 
@@ -67,14 +72,14 @@ export default function Home() {
    }, []);
 
    useEffect(() => {
-      if(openEditForm || openCreateTaskForm){
-         document.body.style = "overflow: hidden"
+      if (openEditForm || openCreateTaskForm) {
+         document.body.style = "overflow: hidden";
       }
 
       return () => {
-         document.body.style = "overflow: auto" 
-      }
-   }, [openEditForm,openCreateTaskForm]);
+         document.body.style = "overflow: auto";
+      };
+   }, [openEditForm, openCreateTaskForm]);
 
    return (
       <>
@@ -172,7 +177,15 @@ export default function Home() {
                   <div className="space-y-4">
                      {tasksStatus.taskLength === 0 && (
                         <div className="flex flex-col items-center justify-center gap-16 h-70">
-                           <span className="font-semibold text-gray-400 text-center">You have no items in you Task List click <span onClick={() => toggleCreateOpenTaskForm(true)} className="text-blue-500 text-lg px-1 underline cursor-pointer">Here</span> to create a task</span>
+                           <span className="font-semibold text-gray-400 text-center">
+                              You have no items in you Task List click{" "}
+                              <span
+                                 onClick={() => toggleCreateOpenTaskForm(true)}
+                                 className="text-blue-500 text-lg px-1 underline cursor-pointer">
+                                 Here
+                              </span>{" "}
+                              to create a task
+                           </span>
                            <SquareCheckBig size={130} className="text-gray-200" />
                         </div>
                      )}
