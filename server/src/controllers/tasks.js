@@ -22,6 +22,16 @@ export async function getTask(req, res) {
    }
 }
 
+export async function getTaskBySearch(req, res) {
+   const title = req.query.title?.toLowerCase();
+   try {
+      const filtered = await Task.find({ title: { $regex: `\\b${title}`, $options: "i" } });
+      res.status(200).json(filtered);
+   } catch (e) {
+      res.status(500).json({ msg: "not found" });
+   }
+}
+
 export async function createTask(req, res) {
    const { title, description, priority, completed, tags, date } = req.body;
    if (!title) {
@@ -44,7 +54,8 @@ export async function updateTask(req, res) {
    }
    try {
       const task = await Task.findByIdAndUpdate(
-         taskID, { title, description, priority, completed, tags, date },
+         taskID,
+         { title, description, priority, completed, tags, date },
          { new: true, runValidators: true }
       );
 
@@ -58,7 +69,6 @@ export async function updateTask(req, res) {
 }
 export async function deleteTask(req, res) {
    const { id: taskID } = req.params;
-
    try {
       const task = await Task.findByIdAndDelete(taskID);
       if (!task) {
