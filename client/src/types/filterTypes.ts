@@ -7,5 +7,7 @@ export type filtersTabProps = {
       completed: number;
       uncompleted: number;
    };
-   filter: boolean; // placeholder
+   filter: any; // placeholder
+   onStatusFilterChange: (arg: string) => void
+   onPriorityFilterChange: (arg: string) => void
 };

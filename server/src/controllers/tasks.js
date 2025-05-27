@@ -25,11 +25,31 @@ export async function getTask(req, res) {
 export async function getTaskBySearch(req, res) {
    const title = req.query.title?.toLowerCase();
    try {
-      const tasks = await Task.find()
-      const filtered = tasks.filter(task => task.title.toLowerCase().includes(title))
+      const tasks = await Task.find();
+      const filtered = tasks.filter((task) => task.title.toLowerCase().includes(title));
       res.status(200).json(filtered);
    } catch (e) {
       res.status(500).json({ msg: "not found" });
+   }
+}
+export async function filteredTasks(req, res) {
+   const priority = req.query.priority;
+   const completed = req.query.completed
+
+   let queryObj = {};
+
+   if (priority) {
+      queryObj.priority = priority
+   }
+   if(completed){
+      queryObj.completed = completed
+   }
+   console.log(queryObj)
+   try {
+      const tasks = await Task.find(queryObj);
+      res.status(200).json({ success: true, tasks });
+   } catch (e) {
+      res.status(400).json({msg: "no items found"});
    }
 }
 

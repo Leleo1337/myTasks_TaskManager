@@ -8,25 +8,43 @@ import "react-toastify/dist/ReactToastify.css";
 import FiltersTab from "../components/FiltersTab";
 import { toast, ToastContainer } from "react-toastify";
 
+type filterProps = {
+   status: string;
+   priority: string;
+};
+
 export default function Home() {
    const [openCreateTaskForm, toggleCreateOpenTaskForm] = useState<boolean>(false);
    const [menuOpen, setMenuOpen] = useState<string | null | undefined>("");
    const [openEditForm, toggleOpenEditForm] = useState<string | null | undefined>("");
    const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
+   const [allTasks, setAllTasks] = useState<taskProps[]>([]);
    const [tasks, setTasks] = useState<taskProps[]>([]);
+   const [filters, setFilters] = useState<filterProps>({
+      status: "All",
+      priority: "All",
+   });
+
+   const handleStatusFilterChange = (status: string) => {
+      setFilters((prev) => ({ ...prev, status }));
+   };
+
+   const handlePriorityFilterChange = (priority: string) => {
+      setFilters((prev) => ({ ...prev, priority }));
+   };
 
    const tasksStatus = {
-      taskLength: tasks?.length,
-      completed: tasks?.filter((task) => task.completed === true).length,
+      taskLength: allTasks?.length,
+      completed: allTasks?.filter((task) => task.completed === true).length,
    };
    const percentage = tasksStatus.taskLength === 0 ? 0 : (tasksStatus.completed / tasksStatus.taskLength) * 100;
 
    const taskQuantity = {
-      all: tasks.length,
-      low: tasks.filter((task) => task.priority === "Low").length,
-      medium: tasks.filter((task) => task.priority === "Medium").length,
-      high: tasks.filter((task) => task.priority === "High").length,
-      completed: tasks.filter((task) => task.completed === true).length,
+      all: allTasks.length,
+      low: allTasks.filter((task) => task.priority === "Low").length,
+      medium: allTasks.filter((task) => task.priority === "Medium").length,
+      high: allTasks.filter((task) => task.priority === "High").length,
+      completed: allTasks.filter((task) => task.completed === true).length,
       uncompleted: tasksStatus.taskLength - tasksStatus.completed,
    };
 
@@ -35,6 +53,7 @@ export default function Home() {
          .get("http://localhost:3000/api/v1/tasks")
          .then(function (response) {
             setTasks(response.data.tasks);
+            setAllTasks(response.data.tasks);
          })
          .catch((e) => console.log(e));
    }
@@ -70,6 +89,29 @@ export default function Home() {
    useEffect(() => {
       getTasks();
    }, []);
+
+   useEffect(() => {
+      const params: Record<string, any> = {};
+
+      if (filters.priority !== "All") {
+         // Mantém a primeira letra maiúscula como o backend espera
+         params.priority = filters.priority; // Já está no formato "High", "Medium", "Low"
+      }
+
+      if (filters.status !== "All") {
+         params.completed = filters.status === "Completed";
+      }
+
+      axios
+         .get(`http://localhost:3000/api/v1/tasks/filter`, { params })
+         .then((response) => {
+            setTasks(response.data.tasks || []);
+         })
+         .catch((error) => {
+            console.error("Filter error:", error);
+            toast.error("Failed to load filtered tasks");
+         });
+   }, [filters]);
 
    useEffect(() => {
       if (openEditForm || openCreateTaskForm) {
@@ -173,7 +215,16 @@ export default function Home() {
                   </div>
                </section>
                <section className="pt-6">
-                  <div>{filtersTabActive && <FiltersTab quantity={taskQuantity} filter={true} />}</div>
+                  <div>
+                     {filtersTabActive && (
+                        <FiltersTab
+                           quantity={taskQuantity}
+                           filter={filters}
+                           onStatusFilterChange={handleStatusFilterChange}
+                           onPriorityFilterChange={handlePriorityFilterChange}
+                        />
+                     )}
+                  </div>
                   <div className="space-y-4">
                      {tasksStatus.taskLength === 0 && (
                         <div className="flex flex-col items-center justify-center gap-16 h-70">
