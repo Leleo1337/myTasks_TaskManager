@@ -94,8 +94,7 @@ export default function Home() {
       const params: Record<string, any> = {};
 
       if (filters.priority !== "All") {
-         // Mantém a primeira letra maiúscula como o backend espera
-         params.priority = filters.priority; // Já está no formato "High", "Medium", "Low"
+         params.priority = filters.priority; 
       }
 
       if (filters.status !== "All") {
