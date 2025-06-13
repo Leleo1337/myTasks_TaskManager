@@ -13,7 +13,6 @@ type filterProps = {
    priority: string;
 };
 
-const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
    const [openCreateTaskForm, toggleCreateOpenTaskForm] = useState<boolean>(false);
@@ -26,6 +25,7 @@ export default function Home() {
       status: "All",
       priority: "All",
    });
+   const API_URL = import.meta.env.VITE_API_URL;
 
    const handleStatusFilterChange = (status: string) => {
       setFilters((prev) => ({ ...prev, status }));
@@ -118,7 +118,6 @@ export default function Home() {
       if (openEditForm || openCreateTaskForm) {
          document.body.style = "overflow: hidden";
       }
-
       return () => {
          document.body.style = "overflow: auto";
       };
@@ -241,7 +240,7 @@ export default function Home() {
                            <SquareCheckBig size={130} className="text-gray-200" />
                         </div>
                      )}
-                     {tasks &&
+                     {tasks.length > 1 &&
                         tasks.map((task) => (
                            <Task
                               key={task._id}

@@ -10,7 +10,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api/v1/tasks': 'http://localhost:3000'
+      '/api/v1/tasks': 'https://task-manager-eosin-nu-66.vercel.app/'
     }
   }
 })
