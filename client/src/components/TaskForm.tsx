@@ -22,6 +22,8 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
    const [colorPickerButtonActive, setColorPickerButtonActive] = useState<boolean>(false);
    const colorPickerRef = useRef<HTMLDivElement | null>(null);
 
+      const API_URL = import.meta.env.VITE_API_URL;
+
    function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
       const { name, value } = e.target;
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -56,9 +58,9 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
       e.preventDefault();
       try {
          if (method === "Create task") {
-            await axios.post("http://localhost:3000/api/v1/tasks", formData);
+            await axios.post(`${API_URL}/api/v1/tasks", formData`);
          } else {
-            await axios.patch(`http://localhost:3000/api/v1/tasks/${task?._id}`, formData);
+            await axios.patch(`${API_URL}/api/v1/tasks/${task?._id}`, formData);
          }
          onSubmitSuccess();
       } catch (error: any) {
