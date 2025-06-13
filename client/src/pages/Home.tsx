@@ -13,6 +13,8 @@ type filterProps = {
    priority: string;
 };
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Home() {
    const [openCreateTaskForm, toggleCreateOpenTaskForm] = useState<boolean>(false);
    const [menuOpen, setMenuOpen] = useState<string | null | undefined>("");
@@ -50,7 +52,7 @@ export default function Home() {
 
    function getTasks() {
       axios
-         .get("http://localhost:3000/api/v1/tasks")
+         .get(`${API_URL}/api/v1/tasks`)
          .then(function (response) {
             setTasks(response.data.tasks);
             setAllTasks(response.data.tasks);
@@ -59,20 +61,20 @@ export default function Home() {
    }
 
    function getTaskBySearch(query: string) {
-      axios.get(`http://localhost:3000/api/v1/tasks/search/`, { params: { title: query } }).then(function (response) {
+      axios.get(`${API_URL}/api/v1/tasks/search/`, { params: { title: query } }).then(function (response) {
          setTasks(response.data);
       });
    }
 
    function deleteTask(taskID: string | undefined) {
-      axios.delete(`http://localhost:3000/api/v1/tasks/${taskID}`).then(() => {
+      axios.delete(`${API_URL}/api/v1/tasks/${taskID}`).then(() => {
          setTasks((prev) => prev?.filter((task) => task._id !== taskID));
       });
    }
 
    function completeTask(taskID: string | undefined) {
       const task = tasks?.find((task) => task._id === taskID);
-      axios.patch(`http://localhost:3000/api/v1/tasks/${taskID}`, { ...task, completed: !task?.completed }).then(() => {
+      axios.patch(`${API_URL}/api/v1/tasks/${taskID}`, { ...task, completed: !task?.completed }).then(() => {
          getTasks();
       });
    }
@@ -102,7 +104,7 @@ export default function Home() {
       }
 
       axios
-         .get(`http://localhost:3000/api/v1/tasks/filter`, { params })
+         .get(`${API_URL}/api/v1/tasks/filter`, { params })
          .then((response) => {
             setTasks(response.data.tasks || []);
          })
@@ -132,7 +134,7 @@ export default function Home() {
                onSubmitSuccess={() => {
                   toast.success("Task created succefully");
                   toggleCreateOpenTaskForm(false);
-                  axios.get("http://localhost:3000/api/v1/tasks").then((response) => {
+                  axios.get(`${API_URL}/api/v1/tasks`).then((response) => {
                      setTasks(response.data.tasks);
                   });
                }}
@@ -146,7 +148,7 @@ export default function Home() {
                onSubmitSuccess={() => {
                   toast.success("Task edited succefully");
                   toggleOpenEditForm(null);
-                  axios.get("http://localhost:3000/api/v1/tasks").then((response) => {
+                  axios.get(`${API_URL}/api/v1/tasks`).then((response) => {
                      setTasks(response.data.tasks);
                   });
                   setMenuOpen(null);
