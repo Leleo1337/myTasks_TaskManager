@@ -5,7 +5,8 @@ export async function getAllTasks(req, res) {
       const tasks = await Task.find({});
       res.status(200).json({ success: true, tasks });
    } catch (error) {
-      res.status(500).json({ msg: error });
+      console.error("ERRO DETALHADO AO BUSCAR TAREFAS:", error);
+      res.status(500).json({ success: false, msg: "Ocorreu um erro interno no servidor." });
    }
 }
 
@@ -34,22 +35,22 @@ export async function getTaskBySearch(req, res) {
 }
 export async function filteredTasks(req, res) {
    const priority = req.query.priority;
-   const completed = req.query.completed
+   const completed = req.query.completed;
 
    let queryObj = {};
 
    if (priority) {
-      queryObj.priority = priority
+      queryObj.priority = priority;
    }
-   if(completed){
-      queryObj.completed = completed
+   if (completed) {
+      queryObj.completed = completed;
    }
-   console.log(queryObj)
+   console.log(queryObj);
    try {
       const tasks = await Task.find(queryObj);
       res.status(200).json({ success: true, tasks });
    } catch (e) {
-      res.status(400).json({msg: "no items found"});
+      res.status(400).json({ msg: "no items found" });
    }
 }
 
