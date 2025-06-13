@@ -6,9 +6,11 @@ configDotenv();
 
 const PORT = 3000;
 
+const DATABASE_ACCESS = process.env.DATABASE_ACCESS
+
 async function start() {
    try {
-      await connectDB(process.env.DATABASE_ACCESS);
+      await connectDB(DATABASE_ACCESS);
       app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
    } catch (error) {
       console.log(error);
