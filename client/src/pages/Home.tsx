@@ -11,8 +11,9 @@ export default function Home() {
   const [tasks, setTasks] = useState<taskProps[]>([]);
   const [taskMenuOpen, setOpenTaskMenu] = useState<string>("");
   const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
-  const [openCreateTaskForm, toggleCreateOpenTaskForm] = useState<boolean>(false);
-  const [openEditForm, setOpenEditForm] = useState<string>(""); // a string é pro id da task
+  const [openCreateForm, setOpenCreateForm] = useState<boolean>(false);
+  const [openEditForm, setOpenEditForm] = useState<string>(""); // GUARDA O ID DA TASK
+  const [taskToEdit, setTaskToEdit] = useState<taskProps>();
 
   async function fetchTasks() {
     try {
@@ -34,9 +35,17 @@ export default function Home() {
     try {
       await deleteTask(id);
       toast.success("Deleted task");
+      fetchTasks()
     } catch (error: any) {
       toast.error(error.data);
     }
+  }
+
+  function taskSubmitMessage(message: string) {
+    toast.success(message);
+    setOpenCreateForm(false);
+    setOpenEditForm("");
+    fetchTasks()
   }
 
   useEffect(() => {
@@ -46,20 +55,19 @@ export default function Home() {
   return (
     <>
       <ToastContainer />
-      {openCreateTaskForm && (
+      {openCreateForm && (
         <TaskForm
           method="create"
-          onCancel={() => toggleCreateOpenTaskForm(false)}
-          onSubmitSuccess={() => {
-            toast.success("Task created succefully");
-          }}
+          onCancel={() => setOpenCreateForm(false)}
+          onSubmitSuccess={() => taskSubmitMessage("Task created!")}
         />
       )}
       {openEditForm && (
         <TaskForm
+          task={taskToEdit}
           method="edit"
           onCancel={() => setOpenEditForm("")}
-          onSubmitSuccess={() => toast.success("Task updated succefully")}
+          onSubmitSuccess={() => taskSubmitMessage("Task updated!")}
         />
       )}
       <div className="w-full">
@@ -90,7 +98,7 @@ export default function Home() {
                 <span className="bg-blue-600/20 text-blue-800 h-5 rounded-full px-2.5 text-sm">taskLength</span>
               </div>
               <button
-                onClick={() => toggleCreateOpenTaskForm(!openCreateTaskForm)}
+                onClick={() => setOpenCreateForm(!openCreateForm)}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-md font-semibold text-white text-sm cursor-pointer transition-colors ease-in duration-75">
                 <PlusCircle size={20} /> Add Task
               </button>
@@ -123,7 +131,7 @@ export default function Home() {
                   <span className="font-semibold text-gray-400 text-center">
                     You have no items in you Task List click
                     <span
-                      onClick={() => toggleCreateOpenTaskForm(true)}
+                      onClick={() => setOpenCreateForm(true)}
                       className="text-blue-500 text-lg px-1 underline cursor-pointer">
                       Here
                     </span>
@@ -139,15 +147,18 @@ export default function Home() {
                     title={task.title}
                     description={task.description}
                     priority={task.priority}
+                    date={task.date}
+                    tags={task.tags}
+                    menuOpen={taskMenuOpen === task._id}
+                    completed={task.completed}
                     deleteTask={() => handleDeleteTask(task._id!)}
                     toggleComplete={() => handleCompleteTask(task._id!)}
                     toggleSettings={() => setOpenTaskMenu(task._id!)}
-                    date={task.date}
-                    tags={task.tags}
-                    toggleEditForm={() => setOpenEditForm(task._id!)}
+                    toggleEditForm={() => {
+                      setOpenEditForm(task._id!);
+                      setTaskToEdit(task);
+                    }}
                     onCloseMenu={() => setOpenTaskMenu("")}
-                    menuOpen={taskMenuOpen === task._id}
-                    completed={task.completed}
                   />
                 ))}
             </div>
