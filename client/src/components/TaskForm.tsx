@@ -1,11 +1,11 @@
 import { Palette, X } from "lucide-react";
 import type { taskFormProps } from "../types/tasksTypes";
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { SketchPicker } from "react-color";
 import CustomFlag from "./CustomFlag";
 import { v4 } from "uuid";
+import { createTask, updateTask } from "../services/tasksServices";
 
 export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: taskFormProps) {
   const [formData, setFormData] = useState({
@@ -21,8 +21,6 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
   const [tagText, setTagText] = useState<string>("");
   const [colorPickerButtonActive, setColorPickerButtonActive] = useState<boolean>(false);
   const colorPickerRef = useRef<HTMLDivElement | null>(null);
-
-  const API_URL = import.meta.env.VITE_API_URL;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
@@ -57,14 +55,17 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      if (method === "Create task") {
-        await axios.post(`${API_URL}/api/v1/tasks", formData`);
-      } else {
-        await axios.patch(`${API_URL}/api/v1/tasks/${task?._id}`, formData);
+      switch (method) {
+        case "edit":
+          await updateTask(task?._id!, formData);
+          break;
+        case "create":
+          await createTask(formData);
+          break;
       }
       onSubmitSuccess();
     } catch (error: any) {
-      toast.error(error.response?.data.msg);
+      toast.error(error.response.data.msg);
     }
   }
 
