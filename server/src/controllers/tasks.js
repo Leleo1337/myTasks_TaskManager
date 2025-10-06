@@ -1,8 +1,14 @@
 import Task from "../models/task.js";
 
 export async function getAllTasks(req, res) {
+  const { search } = req.query;
+  let tasks;
   try {
-    const tasks = await Task.find({});
+    if (search) {
+      tasks = await Task.find({ title: { $regex: search, $options: "i" } });
+    } else {
+      tasks = await Task.find({});
+    }
     res.status(200).json({ success: true, tasks });
   } catch (error) {
     console.error("ERRO DETALHADO AO BUSCAR TAREFAS:", error);
