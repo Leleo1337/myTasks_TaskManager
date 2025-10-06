@@ -1,5 +1,5 @@
 export type filtersTabProps = {
-   quantity: {
+   quantity?: {
       all: number;
       low: number;
       medium: number;
@@ -7,7 +7,7 @@ export type filtersTabProps = {
       completed: number;
       uncompleted: number;
    };
-   filter: any; // placeholder
-   onStatusFilterChange: (arg: string) => void
-   onPriorityFilterChange: (arg: string) => void
+   filter?: any; // placeholder
+   onStatusFilterChange?: (arg: string) => void
+   onPriorityFilterChange?: (arg: string) => void
 };

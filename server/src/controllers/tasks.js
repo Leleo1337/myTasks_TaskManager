@@ -1,8 +1,14 @@
 import Task from "../models/task.js";
 
 export async function getAllTasks(req, res) {
+  const { search } = req.query;
+  let tasks;
   try {
-    const tasks = await Task.find({});
+    if (search) {
+      tasks = await Task.find({ title: { $regex: search, $options: "i" } });
+    } else {
+      tasks = await Task.find({});
+    }
     res.status(200).json({ success: true, tasks });
   } catch (error) {
     console.error("ERRO DETALHADO AO BUSCAR TAREFAS:", error);
@@ -20,37 +26,6 @@ export async function getTask(req, res) {
     res.status(200).json({ success: true, task });
   } catch (error) {
     res.status(500).json({ msg: error });
-  }
-}
-
-export async function getTaskBySearch(req, res) {
-  const title = req.query.title?.toLowerCase();
-  try {
-    const tasks = await Task.find();
-    const filtered = tasks.filter((task) => task.title.toLowerCase().includes(title));
-    res.status(200).json(filtered);
-  } catch (e) {
-    res.status(500).json({ msg: "not found" });
-  }
-}
-export async function filteredTasks(req, res) {
-  const priority = req.query.priority;
-  const completed = req.query.completed;
-
-  let queryObj = {};
-
-  if (priority) {
-    queryObj.priority = priority;
-  }
-  if (completed) {
-    queryObj.completed = completed;
-  }
-  console.log(queryObj);
-  try {
-    const tasks = await Task.find(queryObj);
-    res.status(200).json({ success: true, tasks });
-  } catch (e) {
-    res.status(400).json({ msg: "no items found" });
   }
 }
 
@@ -89,6 +64,7 @@ export async function updateTask(req, res) {
     res.status(500).json({ msg: error });
   }
 }
+
 export async function deleteTask(req, res) {
   const { id: taskID } = req.params;
   try {

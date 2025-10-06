@@ -2,163 +2,78 @@ import { CheckSquare, Filter, PlusCircle, Search, SquareCheckBig } from "lucide-
 import Task from "../components/Task";
 import { useEffect, useState } from "react";
 import TaskForm from "../components/TaskForm";
-import type { taskProps } from "../types/tasksTypes";
-import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
-import FiltersTab from "../components/FiltersTab";
 import { toast, ToastContainer } from "react-toastify";
-
-type filterProps = {
-  status: string;
-  priority: string;
-};
+import type { taskProps } from "../types/tasksTypes";
+import { deleteTask, getTasks, updateTask } from "../services/tasksServices";
+import FiltersTab from "../components/FiltersTab";
 
 export default function Home() {
-  const [openCreateTaskForm, toggleCreateOpenTaskForm] = useState<boolean>(false);
-  const [menuOpen, setMenuOpen] = useState<string | null | undefined>("");
-  const [openEditForm, toggleOpenEditForm] = useState<string | null | undefined>("");
-  const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
-  const [allTasks, setAllTasks] = useState<taskProps[]>([]);
   const [tasks, setTasks] = useState<taskProps[]>([]);
-  const [filters, setFilters] = useState<filterProps>({
-    status: "All",
-    priority: "All",
-  });
-  const API_URL = import.meta.env.VITE_API_URL;
+  const [taskMenuOpen, setOpenTaskMenu] = useState<string>("");
+  const [filtersTabActive, setfiltersTabActive] = useState<boolean>(false);
+  const [openCreateForm, setOpenCreateForm] = useState<boolean>(false);
+  const [openEditForm, setOpenEditForm] = useState<string>(""); // GUARDA O ID DA TASK
+  const [taskToEdit, setTaskToEdit] = useState<taskProps>();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleStatusFilterChange = (status: string) => {
-    setFilters((prev) => ({ ...prev, status }));
-  };
-
-  const handlePriorityFilterChange = (priority: string) => {
-    setFilters((prev) => ({ ...prev, priority }));
-  };
-
-  const tasksStatus = {
-    taskLength: allTasks?.length,
-    completed: allTasks?.filter((task) => task.completed === true).length,
-  };
-  const percentage = tasksStatus.taskLength === 0 ? 0 : (tasksStatus.completed / tasksStatus.taskLength) * 100;
-
-  const taskQuantity = {
-    all: allTasks.length,
-    low: allTasks.filter((task) => task.priority === "Low").length,
-    medium: allTasks.filter((task) => task.priority === "Medium").length,
-    high: allTasks.filter((task) => task.priority === "High").length,
-    completed: allTasks.filter((task) => task.completed === true).length,
-    uncompleted: tasksStatus.taskLength - tasksStatus.completed,
-  };
-
-  function getTasks() {
-    axios
-      .get(`${API_URL}/api/v1/tasks`)
-      .then(function (response) {
-        if (response) {
-          console.log(response);
-          setTasks(response.data.tasks);
-          setAllTasks(response.data.tasks);
-        }
-      })
-      .catch((e) => console.log(e));
+  async function fetchTasks(searchQuery?: string) {
+    try {
+      const response = await getTasks(searchQuery);
+      setTasks(response.tasks);
+    } catch (error: any) {
+      toast.error(error.data);
+    }
   }
 
-  function getTaskBySearch(query: string) {
-    axios.get(`${API_URL}/api/v1/tasks/search/`, { params: { title: query } }).then(function (response) {
-      setTasks(response.data);
-    });
+  function handleCompleteTask(id: string) {
+    const task = tasks?.find((task) => task._id == id);
+    const updated = { ...task, completed: !task?.completed };
+    updateTask(id, updated);
+    setTasks((prev) => prev.map((task) => (task._id === id ? { ...task, completed: !task.completed } : task)));
   }
 
-  function deleteTask(taskID: string | undefined) {
-    axios.delete(`${API_URL}/api/v1/tasks/${taskID}`).then(() => {
-      setTasks((prev) => prev?.filter((task) => task._id !== taskID));
-    });
+  async function handleDeleteTask(id: string) {
+    try {
+      await deleteTask(id);
+      toast.success("Deleted task");
+      fetchTasks();
+    } catch (error: any) {
+      toast.error(error.data);
+    }
   }
 
-  function completeTask(taskID: string | undefined) {
-    const task = tasks?.find((task) => task._id === taskID);
-    axios
-      .patch(`${API_URL}/api/v1/tasks/${taskID}`, {
-        ...task,
-        completed: !task?.completed,
-      })
-      .then(() => {
-        getTasks();
-      });
-  }
-
-  function searchTasks(search: string) {
-    setTimeout(() => {
-      if (search.trim() === "") {
-        getTasks();
-      }
-      getTaskBySearch(search);
-    }, 600);
+  function taskSubmitMessage(message: string) {
+    toast.success(message);
+    setOpenCreateForm(false);
+    setOpenEditForm("");
+    fetchTasks();
   }
 
   useEffect(() => {
-    getTasks();
+    fetchTasks(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchTasks();
   }, []);
-
-  useEffect(() => {
-    const params: Record<string, any> = {};
-
-    if (filters.priority !== "All") {
-      params.priority = filters.priority;
-    }
-
-    if (filters.status !== "All") {
-      params.completed = filters.status === "Completed";
-    }
-
-    axios
-      .get(`${API_URL}/api/v1/tasks/filter`, { params })
-      .then((response) => {
-        setTasks(response.data.tasks || []);
-      })
-      .catch((error) => {
-        console.error("Filter error:", error);
-        toast.error("Failed to load filtered tasks");
-      });
-  }, [filters]);
-
-  useEffect(() => {
-    if (openEditForm || openCreateTaskForm) {
-      document.body.style = "overflow: hidden";
-    }
-    return () => {
-      document.body.style = "overflow: auto";
-    };
-  }, [openEditForm, openCreateTaskForm]);
 
   return (
     <>
       <ToastContainer />
-      {openCreateTaskForm && (
+      {openCreateForm && (
         <TaskForm
-          method="Create task"
-          onCancel={() => toggleCreateOpenTaskForm(false)}
-          onSubmitSuccess={() => {
-            toast.success("Task created succefully");
-            toggleCreateOpenTaskForm(false);
-            axios.get(`${API_URL}/api/v1/tasks`).then((response) => {
-              setTasks(response.data.tasks);
-            });
-          }}
+          method="create"
+          onCancel={() => setOpenCreateForm(false)}
+          onSubmitSuccess={() => taskSubmitMessage("Task created!")}
         />
       )}
       {openEditForm && (
         <TaskForm
-          method="Edit task"
-          task={tasks.find((task) => task._id === openEditForm)}
-          onCancel={() => toggleOpenEditForm(null)}
-          onSubmitSuccess={() => {
-            toast.success("Task edited succefully");
-            toggleOpenEditForm(null);
-            axios.get(`${API_URL}/api/v1/tasks`).then((response) => {
-              setTasks(response.data.tasks);
-            });
-            setMenuOpen(null);
-          }}
+          task={taskToEdit}
+          method="edit"
+          onCancel={() => setOpenEditForm("")}
+          onSubmitSuccess={() => taskSubmitMessage("Task updated!")}
         />
       )}
       <div className="w-full">
@@ -171,17 +86,13 @@ export default function Home() {
           </div>
           <div className="space-y-1">
             <div className="flex gap-1.5 items-center text-sm">
-              <span className="font-semibold text-gray-500 w-30">
-                {`${tasksStatus.completed}/${tasksStatus.taskLength}`} completed
-              </span>
+              <span className="font-semibold text-gray-500 w-30">{`TASKLENGTH`} completed</span>
               <span className="flex items-center justify-center bg-blue-600/20 font-semibold text-blue-800 rounded-full px-1 w-4 text-xs">
-                {tasksStatus.taskLength}
+                TASKLENGTH
               </span>
             </div>
             <div className="w-full bg-gray-300 h-1 rounded-full">
-              <div
-                className=" h-full bg-blue-600 rounded-full transition-all ease duration-75"
-                style={{ width: `${percentage}%` }}></div>
+              <div className=" h-full bg-blue-600 rounded-full transition-all ease duration-75"></div>
             </div>
           </div>
         </header>
@@ -190,12 +101,10 @@ export default function Home() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <h2 className="font-bold text-2xl">Tasks</h2>
-                <span className="bg-blue-600/20 text-blue-800 h-5 rounded-full px-2.5 text-sm">
-                  {tasksStatus.taskLength}
-                </span>
+                <span className="bg-blue-600/20 text-blue-800 h-5 rounded-full px-2.5 text-sm">taskLength</span>
               </div>
               <button
-                onClick={() => toggleCreateOpenTaskForm(!openCreateTaskForm)}
+                onClick={() => setOpenCreateForm(!openCreateForm)}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-md font-semibold text-white text-sm cursor-pointer transition-colors ease-in duration-75">
                 <PlusCircle size={20} /> Add Task
               </button>
@@ -208,8 +117,9 @@ export default function Home() {
                 <input
                   type="text"
                   id="text"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchQuery}
                   placeholder="Search tasks..."
-                  onChange={(e) => searchTasks(e.target.value)}
                   autoComplete="off"
                   className="w-full pl-10 py-2 outline-none focus:ring ring-blue-500 rounded-md"
                 />
@@ -220,34 +130,25 @@ export default function Home() {
                 <Filter size={18} /> Filters
               </button>
             </div>
+            <div className="pt-4">{filtersTabActive && <FiltersTab />}</div>
           </section>
-          <section className="pt-6">
-            <div>
-              {filtersTabActive && (
-                <FiltersTab
-                  quantity={taskQuantity}
-                  filter={filters}
-                  onStatusFilterChange={handleStatusFilterChange}
-                  onPriorityFilterChange={handlePriorityFilterChange}
-                />
-              )}
-            </div>
+          <section>
             <div className="space-y-4">
-              {tasksStatus.taskLength === 0 && (
+              {tasks?.length == 0 && (
                 <div className="flex flex-col items-center justify-center gap-16 h-70">
                   <span className="font-semibold text-gray-400 text-center">
-                    You have no items in you Task List click{" "}
+                    You have no items in you Task List click
                     <span
-                      onClick={() => toggleCreateOpenTaskForm(true)}
+                      onClick={() => setOpenCreateForm(true)}
                       className="text-blue-500 text-lg px-1 underline cursor-pointer">
                       Here
-                    </span>{" "}
+                    </span>
                     to create a task
                   </span>
                   <SquareCheckBig size={130} className="text-gray-200" />
                 </div>
               )}
-              {tasks.length > 1 &&
+              {tasks != null &&
                 tasks.map((task) => (
                   <Task
                     key={task._id}
@@ -256,13 +157,16 @@ export default function Home() {
                     priority={task.priority}
                     date={task.date}
                     tags={task.tags}
-                    toggleSettings={() => setMenuOpen(menuOpen === task._id ? null : task._id)}
-                    toggleComplete={() => completeTask(task._id)}
-                    toggleEditForm={() => toggleOpenEditForm(openEditForm === task._id ? null : task._id)}
-                    deleteTask={() => deleteTask(task._id)}
-                    onCloseMenu={() => setMenuOpen(null)}
-                    menuOpen={menuOpen === task._id}
+                    menuOpen={taskMenuOpen === task._id}
                     completed={task.completed}
+                    deleteTask={() => handleDeleteTask(task._id!)}
+                    toggleComplete={() => handleCompleteTask(task._id!)}
+                    toggleSettings={() => setOpenTaskMenu(task._id!)}
+                    toggleEditForm={() => {
+                      setOpenEditForm(task._id!);
+                      setTaskToEdit(task);
+                    }}
+                    onCloseMenu={() => setOpenTaskMenu("")}
                   />
                 ))}
             </div>
