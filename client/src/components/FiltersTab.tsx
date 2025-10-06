@@ -2,6 +2,7 @@ import type { filtersTabProps } from "../types/filterTypes";
 
 export default function FiltersTab({}: filtersTabProps) {
   const btnActive = `bg-blue-300/60 text-blue-700 py-1 px-4 rounded-md border border-blue-500`;
+  console.log(btnActive);
   return (
     <div className="p-4 mb-8 border border-gray-200 rounded-md space-y-4">
       <div className="space-y-2">
