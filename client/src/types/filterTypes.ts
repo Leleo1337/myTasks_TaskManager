@@ -1,5 +1,5 @@
 export type filtersTabProps = {
-   quantity: {
+   quantity?: {
       all: number;
       low: number;
       medium: number;
