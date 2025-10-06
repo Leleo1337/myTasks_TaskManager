@@ -1,8 +1,14 @@
 import api from "./api";
 
-export async function getTasks() {
+export async function getTasks(search?: string) {
+  let response;
   try {
-    const response = await api.get("/");
+    if (search) {
+      response = await api.get(`/?search=${search}`);
+    } else {
+      response = await api.get("/");
+    }
+    console.log(response)
     return response.data;
   } catch (error: any) {
     throw error;
