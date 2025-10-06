@@ -5,7 +5,7 @@ import TaskForm from "../components/TaskForm";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import type { taskProps } from "../types/tasksTypes";
-import { deleteTask, getTasks, updateTask } from "../services/tasksServices";
+import { deleteTask, getTasks, getTasksStats, updateTask } from "../services/tasksServices";
 import FiltersTab from "../components/FiltersTab";
 
 export default function Home() {
@@ -16,6 +16,7 @@ export default function Home() {
   const [openEditForm, setOpenEditForm] = useState<string>(""); // GUARDA O ID DA TASK
   const [taskToEdit, setTaskToEdit] = useState<taskProps>();
   const [searchQuery, setSearchQuery] = useState("");
+  const [taskStats, setTaskStats] = useState({ total: 0, completed: 0, remaining: 0 });
 
   async function fetchTasks(searchQuery?: string) {
     try {
@@ -26,11 +27,19 @@ export default function Home() {
     }
   }
 
-  function handleCompleteTask(id: string) {
+  async function handleCompleteTask(id: string) {
     const task = tasks?.find((task) => task._id == id);
+    if (!task) return;
+
     const updated = { ...task, completed: !task?.completed };
-    updateTask(id, updated);
-    setTasks((prev) => prev.map((task) => (task._id === id ? { ...task, completed: !task.completed } : task)));
+
+    try {
+      await updateTask(id, updated);
+      await fetchTasks(); 
+      await fetchTaskStats();
+    } catch (error: any) {
+      toast.error(error.data);
+    }
   }
 
   async function handleDeleteTask(id: string) {
@@ -50,11 +59,25 @@ export default function Home() {
     fetchTasks();
   }
 
+  async function fetchTaskStats() {
+    try {
+      const response = await getTasksStats();
+      setTaskStats({
+        completed: response.data.completed,
+        remaining: response.data.remaining,
+        total: response.data.total,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   useEffect(() => {
     fetchTasks(searchQuery);
   }, [searchQuery]);
 
   useEffect(() => {
+    fetchTaskStats();
     fetchTasks();
   }, []);
 
@@ -86,13 +109,15 @@ export default function Home() {
           </div>
           <div className="space-y-1">
             <div className="flex gap-1.5 items-center text-sm">
-              <span className="font-semibold text-gray-500 w-30">{`TASKLENGTH`} completed</span>
+              <span className="font-semibold text-gray-500 w-30">{taskStats.completed} completed</span>
               <span className="flex items-center justify-center bg-blue-600/20 font-semibold text-blue-800 rounded-full px-1 w-4 text-xs">
-                TASKLENGTH
+                {taskStats.total}
               </span>
             </div>
             <div className="w-full bg-gray-300 h-1 rounded-full">
-              <div className=" h-full bg-blue-600 rounded-full transition-all ease duration-75"></div>
+              <div
+                className="h-full bg-blue-600 rounded-full transition-all ease duration-75"
+                style={{ width: `${(taskStats.completed / taskStats.total) * 100}%` }}></div>
             </div>
           </div>
         </header>
@@ -101,7 +126,7 @@ export default function Home() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <h2 className="font-bold text-2xl">Tasks</h2>
-                <span className="bg-blue-600/20 text-blue-800 h-5 rounded-full px-2.5 text-sm">taskLength</span>
+                <span className="bg-blue-600/20 text-blue-800 h-5 rounded-full px-2.5 text-sm">{taskStats.total}</span>
               </div>
               <button
                 onClick={() => setOpenCreateForm(!openCreateForm)}

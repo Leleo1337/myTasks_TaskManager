@@ -8,7 +8,6 @@ export async function getTasks(search?: string) {
     } else {
       response = await api.get("/");
     }
-    console.log(response)
     return response.data;
   } catch (error: any) {
     throw error;
@@ -18,6 +17,15 @@ export async function getTasks(search?: string) {
 export async function getTask(id: string) {
   try {
     const response = await api.get(`/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
+}
+
+export async function getTasksStats() {
+  try {
+    const response = await api.get(`/stats`);
     return response.data;
   } catch (error: any) {
     throw error;
