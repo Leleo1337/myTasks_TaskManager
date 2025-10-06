@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import type { taskProps } from "../types/tasksTypes";
 import { deleteTask, getTasks, updateTask } from "../services/tasksServices";
+import FiltersTab from "../components/FiltersTab";
 
 export default function Home() {
   const [tasks, setTasks] = useState<taskProps[]>([]);
@@ -14,10 +15,11 @@ export default function Home() {
   const [openCreateForm, setOpenCreateForm] = useState<boolean>(false);
   const [openEditForm, setOpenEditForm] = useState<string>(""); // GUARDA O ID DA TASK
   const [taskToEdit, setTaskToEdit] = useState<taskProps>();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  async function fetchTasks() {
+  async function fetchTasks(searchQuery?: string) {
     try {
-      const response = await getTasks();
+      const response = await getTasks(searchQuery);
       setTasks(response.tasks);
     } catch (error: any) {
       toast.error(error.data);
@@ -35,7 +37,7 @@ export default function Home() {
     try {
       await deleteTask(id);
       toast.success("Deleted task");
-      fetchTasks()
+      fetchTasks();
     } catch (error: any) {
       toast.error(error.data);
     }
@@ -45,8 +47,12 @@ export default function Home() {
     toast.success(message);
     setOpenCreateForm(false);
     setOpenEditForm("");
-    fetchTasks()
+    fetchTasks();
   }
+
+  useEffect(() => {
+    fetchTasks(searchQuery);
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchTasks();
@@ -111,6 +117,8 @@ export default function Home() {
                 <input
                   type="text"
                   id="text"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchQuery}
                   placeholder="Search tasks..."
                   autoComplete="off"
                   className="w-full pl-10 py-2 outline-none focus:ring ring-blue-500 rounded-md"
@@ -122,9 +130,9 @@ export default function Home() {
                 <Filter size={18} /> Filters
               </button>
             </div>
+            <div className="pt-4">{filtersTabActive && <FiltersTab />}</div>
           </section>
-          <section className="pt-6">
-            <div>filters</div>
+          <section>
             <div className="space-y-4">
               {tasks?.length == 0 && (
                 <div className="flex flex-col items-center justify-center gap-16 h-70">
