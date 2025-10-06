@@ -1,7 +1,7 @@
 import { Palette, X } from "lucide-react";
 import type { taskFormProps } from "../types/tasksTypes";
 import { useEffect, useRef, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { SketchPicker } from "react-color";
 import CustomFlag from "./CustomFlag";
 import { v4 } from "uuid";
@@ -80,9 +80,9 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
     return () => document.removeEventListener("mousedown", handleClickOutSideColorPicker);
   }, []);
 
+
   return (
     <>
-      <ToastContainer />
       <div className="fixed z-50 w-full h-screen bg-black/40 backdrop-blur-xs">
         <div className="absolute z-10 top-1/2 left-1/2 -translate-1/2 bg-white w-[90%] max-w-[500px] rounded-md">
           <div className="flex justify-between border-b border-gray-300 p-4 py-6">
