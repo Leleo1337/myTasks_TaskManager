@@ -29,6 +29,17 @@ export async function getTask(req, res) {
   }
 }
 
+export async function getTasksStats(req, res) {
+  try {
+    const total = await Task.countDocuments({});
+    const completed = await Task.countDocuments({ completed: true });
+    const remaining = total - completed;
+    res.status(200).json({ success: true, data: { total, completed, remaining } });
+  } catch (error) {
+    res.status(500).json({ msg: error });
+  }
+}
+
 export async function createTask(req, res) {
   const { title, description, priority, completed, tags, date } = req.body;
   if (!title) {
