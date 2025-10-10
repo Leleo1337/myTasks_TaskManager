@@ -1,4 +1,4 @@
-import { CheckSquare, Filter, PlusCircle, Search, SquareCheckBig } from "lucide-react";
+import { CheckSquare, CircleX, Filter, PlusCircle, Search, SquareCheckBig } from "lucide-react";
 import Task from "../components/Task";
 import { useEffect, useState } from "react";
 import TaskForm from "../components/TaskForm";
@@ -17,13 +17,15 @@ export default function Home() {
   const [taskToEdit, setTaskToEdit] = useState<taskProps>();
   const [searchQuery, setSearchQuery] = useState("");
   const [taskStats, setTaskStats] = useState({ total: 0, completed: 0, remaining: 0 });
+  const [hasFailedToConnect, setHasFailedToConnect] = useState(false);
 
   async function fetchTasks(searchQuery?: string) {
     try {
       const response = await getTasks(searchQuery);
       setTasks(response.tasks);
     } catch (error: any) {
-      toast.error(error.data);
+      toast.error("Connection to database failed!");
+      setHasFailedToConnect(true);
     }
   }
 
@@ -35,7 +37,7 @@ export default function Home() {
 
     try {
       await updateTask(id, updated);
-      await fetchTasks(); 
+      await fetchTasks();
       await fetchTaskStats();
     } catch (error: any) {
       toast.error(error.data);
@@ -159,7 +161,17 @@ export default function Home() {
           </section>
           <section>
             <div className="space-y-4">
-              {tasks?.length == 0 && (
+              {hasFailedToConnect && (
+                <>
+                  <div className="flex flex-col items-center justify-center gap-6 h-70">
+                    <span className="text-2xl font-semibold text-gray-400 text-center">
+                      Something went wrong with database, try again later!
+                    </span>
+                    <CircleX size={130} className="text-gray-200" />
+                  </div>
+                </>
+              )}
+              {tasks?.length == 0 && !hasFailedToConnect && (
                 <div className="flex flex-col items-center justify-center gap-16 h-70">
                   <span className="font-semibold text-gray-400 text-center">
                     You have no items in you Task List click
