@@ -1,13 +1,11 @@
 import api from "./api";
 
-export async function getTasks(search?: string) {
-  let response;
+export async function getTasks(query?: any) {
   try {
-    if (search) {
-      response = await api.get(`/?search=${search}`);
-    } else {
-      response = await api.get("/");
-    }
+    const response = await api.get(
+      `?search=${query?.search || ""}&priority=${query?.priority || "all"}&status=${query?.status || "all"}`
+    );
+    console.log(response)
     return response.data;
   } catch (error: any) {
     throw error;
