@@ -27,9 +27,7 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
     setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleAddTag(e: React.FormEvent) {
-    e.preventDefault();
-
+  function handleAddTag() {
     if (formData.tags.length >= 10) {
       toast.error("You cant add more than 10 tags");
       return;
@@ -79,7 +77,6 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
     document.addEventListener("mousedown", handleClickOutSideColorPicker);
     return () => document.removeEventListener("mousedown", handleClickOutSideColorPicker);
   }, []);
-
 
   return (
     <>
@@ -163,7 +160,11 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
                       className="w-full py-1.5 px-3 outline-none border border-gray-300 focus:ring ring-blue-500 rounded-md pr-26"
                     />
                     <button
-                      onClick={(e) => handleAddTag(e)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleAddTag();
+                        setTagText("");
+                      }}
                       className="absolute right-12 bg-blue-600 h-[38px] px-4 rounded-tl-xl rounded-bl-xl rounded-tr-md rounded-br-md text-white hover:bg-blue-700 cursor-pointer">
                       Add a tag
                     </button>
@@ -221,27 +222,3 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
     </>
   );
 }
-
-/* 
-                     <div className="flex flex-col">
-                        <label htmlFor="tags" className="text-gray-500 text-sm pb-1">
-                           Tags
-                        </label>
-                        <div className="relative flex flex-row gap-4">
-                           <input
-                              type="text"
-                              name="tagsText"
-                              id="tags"
-                              placeholder="Add a tag"
-                              onChange={(e) => setTags(e.target.value)}
-                              value={title}
-                              className="w-full py-1.5 px-3 outline-none border border-gray-300 focus:ring ring-blue-500 rounded-md pr-26"
-                           />
-                           <button className="absolute -right-1  bg-blue-600 h-[38px] px-4 rounded-tl-xl rounded-bl-xl rounded-tr-md rounded-br-md text-white hover:bg-blue-700 cursor-pointer">
-                              Add a tag
-                           </button>
-                        </div>
-                     </div>
-
-
-*/
