@@ -15,16 +15,17 @@ export default function Home() {
   const [openCreateForm, setOpenCreateForm] = useState<boolean>(false);
   const [openEditForm, setOpenEditForm] = useState<string>(""); // GUARDA O ID DA TASK
   const [taskToEdit, setTaskToEdit] = useState<taskProps>();
-  const [searchQuery, setSearchQuery] = useState("");
   const [taskStats, setTaskStats] = useState({ total: 0, completed: 0, remaining: 0 });
   const [hasFailedToConnect, setHasFailedToConnect] = useState(false);
+  const [filters, setFilters] = useState({ search: "", status: "all", priority: "all" });
 
-  async function fetchTasks(searchQuery?: string) {
+  async function fetchTasks(query?: string | { status: string; priority: string }) {
     try {
-      const response = await getTasks(searchQuery);
+      const response = await getTasks(query);
       setTasks(response.tasks);
     } catch (error: any) {
       toast.error("Connection to database failed!");
+      console.log(error)
       setHasFailedToConnect(true);
     }
   }
@@ -75,13 +76,17 @@ export default function Home() {
   }
 
   useEffect(() => {
-    fetchTasks(searchQuery);
-  }, [searchQuery]);
+    fetchTasks(filters.search);
+  }, [filters.search]);
 
   useEffect(() => {
     fetchTaskStats();
     fetchTasks();
   }, []);
+
+  useEffect(() => {
+    fetchTasks(filters);
+  }, [filters]);
 
   return (
     <>
@@ -144,8 +149,8 @@ export default function Home() {
                 <input
                   type="text"
                   id="text"
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  value={searchQuery}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+                  value={filters.search}
                   placeholder="Search tasks..."
                   autoComplete="off"
                   className="w-full pl-10 py-2 outline-none focus:ring ring-blue-500 rounded-md"
@@ -157,7 +162,7 @@ export default function Home() {
                 <Filter size={18} /> Filters
               </button>
             </div>
-            <div className="pt-4">{filtersTabActive && <FiltersTab />}</div>
+            <div className="pt-4">{filtersTabActive && <FiltersTab filters={filters} setFilters={setFilters} />}</div>
           </section>
           <section>
             <div className="space-y-4">
