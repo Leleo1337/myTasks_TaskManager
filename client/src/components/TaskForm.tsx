@@ -122,13 +122,13 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
                   <select
                     name="priority"
                     id="priority"
-                    defaultValue="Low"
+                    defaultValue="low"
                     className="w-full py-2 px-4 outline-none border border-gray-300 focus:ring ring-blue-500 rounded-md"
                     onChange={handleChange}
                     value={formData.priority}>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
                   </select>
                 </div>
                 <div className="flex flex-col">
