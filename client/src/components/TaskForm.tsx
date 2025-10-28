@@ -12,7 +12,7 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
     id: task?._id || "",
     title: task?.title || "",
     description: task?.description || "",
-    priority: task?.priority || "Low",
+    priority: task?.priority || "low",
     tags: task?.tags || [],
     date: task?.date?.slice(0, 10) || "",
   });

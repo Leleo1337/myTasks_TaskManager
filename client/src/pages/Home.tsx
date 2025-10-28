@@ -25,7 +25,7 @@ export default function Home() {
       setTasks(response.tasks);
     } catch (error: any) {
       toast.error("Connection to database failed!");
-      console.log(error)
+      console.log(error);
       setHasFailedToConnect(true);
     }
   }
@@ -33,13 +33,17 @@ export default function Home() {
   async function handleCompleteTask(id: string) {
     const task = tasks?.find((task) => task._id == id);
     if (!task) return;
-
     const updated = { ...task, completed: !task?.completed };
+
+    setTasks((prev) => prev.map((task) => (task._id === id ? { ...task, completed: !task.completed } : task)));
+    if (task.completed == false) {
+      setTaskStats((prev) => ({ ...prev, completed: prev.completed + 1 }));
+    } else {
+      setTaskStats((prev) => ({ ...prev, completed: prev.completed - 1 }));
+    }
 
     try {
       await updateTask(id, updated);
-      await fetchTasks();
-      await fetchTaskStats();
     } catch (error: any) {
       toast.error(error.data);
     }
@@ -50,6 +54,7 @@ export default function Home() {
       await deleteTask(id);
       toast.success("Deleted task");
       fetchTasks();
+      fetchTaskStats(); 
     } catch (error: any) {
       toast.error(error.data);
     }

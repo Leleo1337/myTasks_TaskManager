@@ -1,5 +1,5 @@
 export type priorityFlagProps = {
-    type: 'Low' | 'Medium' | 'High'
+    type: 'low' | 'medium' | 'high'
 }
 
 export type customFlagProps = {

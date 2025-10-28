@@ -5,7 +5,6 @@ export async function getTasks(query?: any) {
     const response = await api.get(
       `?search=${query?.search || ""}&priority=${query?.priority || "all"}&status=${query?.status || "all"}`
     );
-    console.log(response)
     return response.data;
   } catch (error: any) {
     throw error;

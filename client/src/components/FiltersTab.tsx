@@ -14,9 +14,7 @@ export default function FiltersTab({ filters, setFilters }: filtersTabProps) {
           <div
             onClick={() => setFilters((prev: any) => ({ ...prev, status: "uncompleted" }))}
             className="cursor-pointer">
-            <div className={`${filters.status == "uncompleted" ? btnActive : btnOff}`}>
-              uncompleted
-            </div>
+            <div className={`${filters.status == "uncompleted" ? btnActive : btnOff}`}>uncompleted</div>
           </div>
           <div onClick={() => setFilters((prev: any) => ({ ...prev, status: "completed" }))} className="cursor-pointer">
             <div className={`${filters.status == "completed" ? btnActive : btnOff}`}>Completed</div>
@@ -27,27 +25,18 @@ export default function FiltersTab({ filters, setFilters }: filtersTabProps) {
         <h4 className="font-semibold text-lg text-gray-500">Priority</h4>
         <div className="grid grid-cols-2 grid-rows-2 sm:flex sm:flex-row gap-4">
           <div onClick={() => setFilters((prev: any) => ({ ...prev, priority: "all" }))} className="cursor-pointer">
-            <div className={`${filters.priority == "all" ? btnActive : btnOff}`}>
-              All
-            </div>
+            <div className={`${filters.priority == "all" ? btnActive : btnOff}`}>All</div>
           </div>
           <div onClick={() => setFilters((prev: any) => ({ ...prev, priority: "low" }))} className="cursor-pointer">
-            <div className={`${filters.priority == "low" ? btnActive : btnOff}`}>
-              Low
-            </div>
+            <div className={`${filters.priority == "low" ? btnActive : btnOff}`}>Low</div>
           </div>
           <div onClick={() => setFilters((prev: any) => ({ ...prev, priority: "medium" }))} className="cursor-pointer">
-            <div className={`${filters.priority == "medium" ? btnActive : btnOff}`}>
-              Medium
-            </div>
+            <div className={`${filters.priority == "medium" ? btnActive : btnOff}`}>Medium</div>
           </div>
           <div onClick={() => setFilters((prev: any) => ({ ...prev, priority: "high" }))} className="cursor-pointer">
-            <div className={`${filters.priority == "high" ? btnActive : btnOff}`}>
-              High
-            </div>
+            <div className={`${filters.priority == "high" ? btnActive : btnOff}`}>High</div>
           </div>
         </div>
-        <span className="text-red-500 font-semibold text-xs">Filters are not working for now xD</span>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ export type taskProps = {
   _id?: string;
   title: string;
   description: string;
-  priority: "Low" | "Medium" | "High";
+  priority: "low" | "medium" | "high";
   tags?: {
     id?: string;
     text: string;
