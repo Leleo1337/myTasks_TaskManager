@@ -9,10 +9,10 @@ import { createTask, updateTask } from "../services/tasksServices";
 
 export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: taskFormProps) {
   const [formData, setFormData] = useState({
-    id: task?._id || "",
+    id: task?.id || "",
     title: task?.title || "",
     description: task?.description || "",
-    priority: task?.priority || "low",
+    priority: task?.priority || "LOW",
     tags: task?.tags || [],
     date: task?.date?.slice(0, 10) || "",
   });
@@ -55,7 +55,7 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
     try {
       switch (method) {
         case "edit":
-          await updateTask(task?._id!, formData);
+          await updateTask(task?.id!, formData);
           break;
         case "create":
           await createTask(formData);
@@ -126,9 +126,9 @@ export default function TaskForm({ method, onCancel, onSubmitSuccess, task }: ta
                     className="w-full py-2 px-4 outline-none border border-gray-300 focus:ring ring-blue-500 rounded-md"
                     onChange={handleChange}
                     value={formData.priority}>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
                   </select>
                 </div>
                 <div className="flex flex-col">

@@ -1,12 +1,13 @@
-import { CheckSquare, CircleX, Filter, PlusCircle, Search, SquareCheckBig } from "lucide-react";
+import { CheckSquare, Filter, PlusCircle, Search, SquareCheckBig } from "lucide-react";
 import Task from "../components/Task";
 import { useEffect, useState } from "react";
 import TaskForm from "../components/TaskForm";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import type { taskProps } from "../types/tasksTypes";
-import { deleteTask, getTasks, getTasksStats, updateTask } from "../services/tasksServices";
+import { deleteTask, getTasks, updateTask } from "../services/tasksServices";
 import FiltersTab from "../components/FiltersTab";
+import { getTasksStats } from "../services/statsServices";
 
 export default function Home() {
   const [tasks, setTasks] = useState<taskProps[]>([]);
@@ -16,26 +17,23 @@ export default function Home() {
   const [openEditForm, setOpenEditForm] = useState<string>(""); // GUARDA O ID DA TASK
   const [taskToEdit, setTaskToEdit] = useState<taskProps>();
   const [taskStats, setTaskStats] = useState({ total: 0, completed: 0, remaining: 0 });
-  const [hasFailedToConnect, setHasFailedToConnect] = useState(false);
   const [filters, setFilters] = useState({ search: "", status: "all", priority: "all" });
 
   async function fetchTasks(query?: string | { status: string; priority: string }) {
     try {
       const response = await getTasks(query);
-      setTasks(response.tasks);
+      setTasks(response.data);
     } catch (error: any) {
-      toast.error("Connection to database failed!");
       console.log(error);
-      setHasFailedToConnect(true);
     }
   }
 
   async function handleCompleteTask(id: string) {
-    const task = tasks?.find((task) => task._id == id);
+    const task = tasks?.find((task) => task.id == id);
     if (!task) return;
     const updated = { ...task, completed: !task?.completed };
 
-    setTasks((prev) => prev.map((task) => (task._id === id ? { ...task, completed: !task.completed } : task)));
+    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)));
     if (task.completed == false) {
       setTaskStats((prev) => ({ ...prev, completed: prev.completed + 1 }));
     } else {
@@ -54,7 +52,7 @@ export default function Home() {
       await deleteTask(id);
       toast.success("Deleted task");
       fetchTasks();
-      fetchTaskStats(); 
+      fetchTaskStats();
     } catch (error: any) {
       toast.error(error.data);
     }
@@ -171,17 +169,7 @@ export default function Home() {
           </section>
           <section>
             <div className="space-y-4">
-              {hasFailedToConnect && (
-                <>
-                  <div className="flex flex-col items-center justify-center gap-6 h-70">
-                    <span className="text-2xl font-semibold text-gray-400 text-center">
-                      Something went wrong with database, try again later!
-                    </span>
-                    <CircleX size={130} className="text-gray-200" />
-                  </div>
-                </>
-              )}
-              {tasks?.length == 0 && !hasFailedToConnect && (
+              {tasks?.length == 0 && (
                 <div className="flex flex-col items-center justify-center gap-16 h-70">
                   <span className="font-semibold text-gray-400 text-center">
                     You have no items in you Task List click
@@ -198,19 +186,19 @@ export default function Home() {
               {tasks != null &&
                 tasks.map((task) => (
                   <Task
-                    key={task._id}
+                    key={task.id}
                     title={task.title}
                     description={task.description}
                     priority={task.priority}
                     date={task.date}
                     tags={task.tags}
-                    menuOpen={taskMenuOpen === task._id}
+                    menuOpen={taskMenuOpen === task.id}
                     completed={task.completed}
-                    deleteTask={() => handleDeleteTask(task._id!)}
-                    toggleComplete={() => handleCompleteTask(task._id!)}
-                    toggleSettings={() => setOpenTaskMenu(task._id!)}
+                    deleteTask={() => handleDeleteTask(task.id!)}
+                    toggleComplete={() => handleCompleteTask(task.id!)}
+                    toggleSettings={() => setOpenTaskMenu(task.id!)}
                     toggleEditForm={() => {
-                      setOpenEditForm(task._id!);
+                      setOpenEditForm(task.id!);
                       setTaskToEdit(task);
                     }}
                     onCloseMenu={() => setOpenTaskMenu("")}
